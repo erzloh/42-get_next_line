@@ -6,7 +6,7 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:44:27 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/17 11:34:55 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/17 16:34:14 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,9 @@
 
 # include <stdio.h> // I need to remove that before to push
 
-# define BUFFER_SIZE 4096
+# define BUFFER_SIZE 10
 
 char	*get_next_line(int fd);
+char	*ft_strjoin(char const *s1, char const *s2);
 
 #endif

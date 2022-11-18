@@ -1,0 +1,5 @@
+Le tronc commun est composé de 7 séries de projets à faire à la suite réparties en cercles, couvrant plusieurs thèmes, C, C++. Réseau, Web, Graphique...
+Dans ces cercles sont présentés des projets de groupe et des projets solo.
+Chaque cercle ou presque vous propose un choix de projets différents.
+Des Examens sont disponibles à partir du 2è cercle. Ils faut s'inscrire sur l'intranet, tous les Mardis de 10h à 12h ou de 16h à 18h, 1 semaine sur deux.
+Le dernier projet est un gros projet WEB ouvrant sur le reste du cursus.

@@ -6,13 +6,13 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/18 12:19:48 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/18 17:25:29 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*cut_if_newline(char *reserve, char **ptr_reserve)
+char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 {
 	int		i;
 	char	*line;
@@ -28,7 +28,7 @@ char	*cut_if_newline(char *reserve, char **ptr_reserve)
 		{
 			line = malloc(sizeof(char) * (i + 1));
 			ft_memcpy(line, reserve, i);
-			line[i + 1] = '\0';
+			line[i] = '\0';
 			i_start_reserve = i + 1;
 			i++;
 			while (reserve[i])
@@ -50,51 +50,66 @@ char	*cut_if_newline(char *reserve, char **ptr_reserve)
 
 char	*get_next_line(int fd)
 {
-	int			ret;
+	int			char_read;
 	char		buf[BUFFER_SIZE + 1];
 	static char	*reserve;
 	char		*line;
+	static char	last_line_checked;
 
 	if (!reserve)
-		reserve = "";
-	printf("\n---debug:reserve=%s---\n", reserve);
+	{
+		reserve = malloc(sizeof(char) * 1);
+		*reserve = 0;
+	}
+	//printf("\n---reserve=%s---\n", reserve);
 	line = NULL;
-	line = cut_if_newline(reserve, &reserve);
+	line = get_trimmed_line(reserve, &reserve);
 	if (line)
 		return (line);
-	ret = read(fd, buf, BUFFER_SIZE);
-	while (ret)
+	char_read = read(fd, buf, BUFFER_SIZE);
+	if (!char_read && *reserve && !last_line_checked)
 	{
-		if (ret == BUFFER_SIZE)
+		line = reserve;
+		last_line_checked = 1;
+	}
+	while (char_read)
+	{
+		if (char_read == BUFFER_SIZE)
 		{
-			buf[ret] = '\0';
+			buf[char_read] = '\0';
 			reserve = ft_strjoin(reserve, buf);
-			line = cut_if_newline(reserve, &reserve);
+			line = get_trimmed_line(reserve, &reserve);
 			if (line)
-				break ;
-			ret = read(fd, buf, BUFFER_SIZE);
+				return (line);
+			char_read = read(fd, buf, BUFFER_SIZE);
 		}
 		else
 		{
-			buf[ret] = '\0';
+			buf[char_read] = '\0';
 			reserve = ft_strjoin(reserve, buf);
+			line = get_trimmed_line(reserve, &reserve);
+			if (line)
+				return (line);
 			line = reserve;
-			ret = 0;
+			last_line_checked = 1;
+			break ;
 		}
 	}
+	/* if (!line && reserve)
+		free(reserve); */
 	return (line);
 } 
 
-int	main()
+/* int	main()
 {
 	int	fd;
 	int	i;
 
-	fd = open("text2.txt", O_RDONLY);
+	fd = open("text.txt", O_RDONLY);
 	i = 1;
 	if (fd == -1)
 		return (1);
-	while (i <= 7)
+	while (i <= 10)
 	{
 		printf("\nline %d: %s\n", i, get_next_line(fd));
 		i++;
@@ -102,3 +117,4 @@ int	main()
 	if (close(fd) == -1)
 		return (1);
 }
+ */

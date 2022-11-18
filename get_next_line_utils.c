@@ -6,13 +6,13 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:44:17 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/18 08:14:29 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/18 17:18:01 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*str;
 	size_t	len_s1;
@@ -26,6 +26,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	ft_memcpy(str, s1, len_s1);
 	ft_memcpy(str + len_s1, s2, len_s2);
 	str[len_s1 + len_s2] = '\0';
+	free(s1);
 	return (str);
 }
 

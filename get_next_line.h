@@ -6,7 +6,7 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:44:27 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/18 08:14:36 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/18 17:18:14 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,11 @@
 
 # include <stdio.h> // I need to remove that before to push
 
-# define BUFFER_SIZE 10
+//# define BUFFER_SIZE 10
 
 char	*get_next_line(int fd);
-char	*ft_strjoin(char const *s1, char const *s2);
+char	*get_trimmed_line(char *reserve, char **ptr_reserve);
+char	*ft_strjoin(char *s1, char *s2);
 size_t	ft_strlen(const char *s);
 void	*ft_memcpy(void *dst, const void *src, size_t n);
 

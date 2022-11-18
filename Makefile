@@ -6,7 +6,7 @@
 #    By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/17 08:45:09 by eholzer           #+#    #+#              #
-#    Updated: 2022/11/18 16:11:56 by eholzer          ###   ########.fr        #
+#    Updated: 2022/11/18 17:29:16 by eholzer          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ NAME	=	gnl
 
 CC		=	gcc
 
-CFLAGS	=	-Wall -Werror -Wextra -D BUFFER_SIZE=42
+CFLAGS	=	-Wall -Werror -Wextra -D BUFFER_SIZE=3
 
 all:		$(NAME)
 

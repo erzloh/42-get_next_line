@@ -6,7 +6,7 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/18 17:25:29 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/18 17:36:45 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ char	*get_next_line(int fd)
 	char		*line;
 	static char	last_line_checked;
 
+	if (fd == -1)
+		return (NULL);
 	if (!reserve)
 	{
 		reserve = malloc(sizeof(char) * 1);
@@ -116,5 +118,4 @@ char	*get_next_line(int fd)
 	}
 	if (close(fd) == -1)
 		return (1);
-}
- */
+} */

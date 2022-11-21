@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
+/*   By: eric <eric@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/18 17:36:45 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/21 22:35:10 by eric             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 	{
 		if (reserve[i] == '\n')
 		{
-			line = malloc(sizeof(char) * (i + 1));
-			ft_memcpy(line, reserve, i);
-			line[i] = '\0';
+			line = malloc(sizeof(char) * (i + 1 + 1));
+			ft_memcpy(line, reserve, i + 1);
+			line[i + 1] = '\0';
 			i_start_reserve = i + 1;
 			i++;
 			while (reserve[i])
@@ -56,7 +56,8 @@ char	*get_next_line(int fd)
 	char		*line;
 	static char	last_line_checked;
 
-	if (fd == -1)
+	line = NULL;
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, line, 0) < 0)
 		return (NULL);
 	if (!reserve)
 	{
@@ -64,14 +65,16 @@ char	*get_next_line(int fd)
 		*reserve = 0;
 	}
 	//printf("\n---reserve=%s---\n", reserve);
-	line = NULL;
+	//line = NULL;
 	line = get_trimmed_line(reserve, &reserve);
 	if (line)
 		return (line);
 	char_read = read(fd, buf, BUFFER_SIZE);
-	if (!char_read && *reserve && !last_line_checked)
+	if (!char_read && *reserve)
 	{
-		line = reserve;
+		line = get_trimmed_line(reserve, &reserve);
+		if (line)
+			return (line);
 		last_line_checked = 1;
 	}
 	while (char_read)
@@ -97,8 +100,18 @@ char	*get_next_line(int fd)
 			break ;
 		}
 	}
-	/* if (!line && reserve)
-		free(reserve); */
+	if (!char_read && !*reserve)
+	{
+		free(reserve);
+		return (NULL);
+	}
+	if (!char_read && !last_line_checked)
+	{
+		last_line_checked = 1;
+		return (reserve);
+	}
+	if (!line)
+		free(reserve);
 	return (line);
 } 
 

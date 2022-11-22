@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: eric <eric@student.42.fr>                  +#+  +:+       +#+        */
+/*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/21 22:35:10 by eric             ###   ########.fr       */
+/*   Updated: 2022/11/22 16:28:31 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@ char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 		if (reserve[i] == '\n')
 		{
 			line = malloc(sizeof(char) * (i + 1 + 1));
+			if (!line)
+				return (NULL);
 			ft_memcpy(line, reserve, i + 1);
 			line[i + 1] = '\0';
 			i_start_reserve = i + 1;
@@ -62,10 +64,12 @@ char	*get_next_line(int fd)
 	if (!reserve)
 	{
 		reserve = malloc(sizeof(char) * 1);
+		if (!reserve)
+			return (NULL);
 		*reserve = 0;
+		//printf("reserve is allocated at %p", reserve);
 	}
 	//printf("\n---reserve=%s---\n", reserve);
-	//line = NULL;
 	line = get_trimmed_line(reserve, &reserve);
 	if (line)
 		return (line);
@@ -75,7 +79,7 @@ char	*get_next_line(int fd)
 		line = get_trimmed_line(reserve, &reserve);
 		if (line)
 			return (line);
-		last_line_checked = 1;
+		//last_line_checked = 1;
 	}
 	while (char_read)
 	{
@@ -96,39 +100,45 @@ char	*get_next_line(int fd)
 			if (line)
 				return (line);
 			line = reserve;
+			reserve = NULL;
 			last_line_checked = 1;
 			break ;
 		}
 	}
 	if (!char_read && !*reserve)
 	{
+		// printf("reserve at %p is freed", reserve);
 		free(reserve);
 		return (NULL);
 	}
+	// printf("char_read = %d, last_line_checked = %d", char_read, last_line_checked);
 	if (!char_read && !last_line_checked)
 	{
+		//printf("emptying reserve");
 		last_line_checked = 1;
-		return (reserve);
+		line = reserve;
+		reserve = NULL;
+		return (line);
 	}
 	if (!line)
 		free(reserve);
 	return (line);
-} 
+}
 
-/* int	main()
+int	main()
 {
 	int	fd;
 	int	i;
 
-	fd = open("text.txt", O_RDONLY);
+	fd = open("files/41_no_nl", O_RDONLY);
 	i = 1;
 	if (fd == -1)
 		return (1);
-	while (i <= 10)
+	while (i <= 3)
 	{
 		printf("\nline %d: %s\n", i, get_next_line(fd));
 		i++;
 	}
 	if (close(fd) == -1)
 		return (1);
-} */
+}

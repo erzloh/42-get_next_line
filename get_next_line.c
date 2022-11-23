@@ -6,7 +6,7 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/22 16:28:31 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/23 16:53:33 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,11 @@ char	*get_next_line(int fd)
 
 	line = NULL;
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, line, 0) < 0)
+	{
+		free(reserve);
+		reserve = NULL;
 		return (NULL);
+	}
 	if (!reserve)
 	{
 		reserve = malloc(sizeof(char) * 1);
@@ -69,7 +73,7 @@ char	*get_next_line(int fd)
 		*reserve = 0;
 		//printf("reserve is allocated at %p", reserve);
 	}
-	//printf("\n---reserve=%s---\n", reserve);
+	printf("\n---reserve=%s---\n", reserve);
 	line = get_trimmed_line(reserve, &reserve);
 	if (line)
 		return (line);
@@ -109,6 +113,7 @@ char	*get_next_line(int fd)
 	{
 		// printf("reserve at %p is freed", reserve);
 		free(reserve);
+		reserve = NULL;
 		return (NULL);
 	}
 	// printf("char_read = %d, last_line_checked = %d", char_read, last_line_checked);
@@ -121,7 +126,10 @@ char	*get_next_line(int fd)
 		return (line);
 	}
 	if (!line)
+	{
 		free(reserve);
+		reserve = NULL;
+	}
 	return (line);
 }
 
@@ -130,15 +138,16 @@ int	main()
 	int	fd;
 	int	i;
 
-	fd = open("files/41_no_nl", O_RDONLY);
+	fd = open("files/nl", O_RDONLY);
 	i = 1;
 	if (fd == -1)
 		return (1);
-	while (i <= 3)
+	while (i <= 10)
 	{
 		printf("\nline %d: %s\n", i, get_next_line(fd));
 		i++;
 	}
 	if (close(fd) == -1)
 		return (1);
+	return (0);
 }

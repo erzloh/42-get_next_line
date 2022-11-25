@@ -6,22 +6,39 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/23 16:53:33 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/25 10:06:44 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+// Remove a line from the reserve
+
+void	update_reserve(char *reserve, char **ptr_reserve, int line_len)
+{
+	int		i;
+	char	*new_reserve;
+
+	i = 0;
+	while (reserve[line_len + i])
+		i++;
+	new_reserve = malloc(sizeof(char) * (i + 1));
+	ft_memcpy(new_reserve, reserve + line_len, i);
+	new_reserve[i] = '\0';
+	free(reserve);
+	*ptr_reserve = new_reserve;
+}
+
+// Take the reserve and its address as arguments and return a line if a '\n' was
+// found and remove the line from the reserve to keep only what is following the
+// '\n'. Return NULL if no '\n' was found.
+
 char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 {
 	int		i;
 	char	*line;
-	int		len_new_reserve;
-	char	*new_reserve;
-	int		i_start_reserve;
 
 	i = 0;
-	len_new_reserve = 0;
 	while (reserve[i])
 	{
 		if (reserve[i] == '\n')
@@ -31,18 +48,7 @@ char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 				return (NULL);
 			ft_memcpy(line, reserve, i + 1);
 			line[i + 1] = '\0';
-			i_start_reserve = i + 1;
-			i++;
-			while (reserve[i])
-			{
-				len_new_reserve++;
-				i++;
-			}
-			new_reserve = malloc(sizeof(char) * (len_new_reserve + 1));
-			ft_memcpy(new_reserve, reserve + i_start_reserve, len_new_reserve);
-			new_reserve[len_new_reserve] = '\0';
-			free(reserve);
-			*ptr_reserve = new_reserve;
+			update_reserve(reserve, ptr_reserve, i + 1);
 			return (line);
 		}
 		i++;
@@ -58,32 +64,29 @@ char	*get_next_line(int fd)
 	char		*line;
 	static char	last_line_checked;
 
-	line = NULL;
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, line, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, buf, 0) < 0) // Check errors
 	{
 		free(reserve);
-		reserve = NULL;
-		return (NULL);
+		return (reserve = NULL);
 	}
-	if (!reserve)
+	if (!reserve) // Create an empty string if reserve is NULL
 	{
 		reserve = malloc(sizeof(char) * 1);
 		if (!reserve)
 			return (NULL);
 		*reserve = 0;
-		//printf("reserve is allocated at %p", reserve);
 	}
-	printf("\n---reserve=%s---\n", reserve);
-	line = get_trimmed_line(reserve, &reserve);
+	//printf("\n---reserve=%s---\n", reserve);
+	line = get_trimmed_line(reserve, &reserve); // Check if there's a newline in the reserve
 	if (line)
 		return (line);
 	char_read = read(fd, buf, BUFFER_SIZE);
-	if (!char_read && *reserve)
+	if (!char_read && *reserve) // Check for newlines in the reserve
 	{
 		line = get_trimmed_line(reserve, &reserve);
 		if (line)
 			return (line);
-		//last_line_checked = 1;
+		// last_line_checked = 1;
 	}
 	while (char_read)
 	{
@@ -109,17 +112,13 @@ char	*get_next_line(int fd)
 			break ;
 		}
 	}
-	if (!char_read && !*reserve)
+	if (!char_read && !*reserve) // Check there is nothing to read and the reserve is empty
 	{
-		// printf("reserve at %p is freed", reserve);
 		free(reserve);
-		reserve = NULL;
-		return (NULL);
+		return (reserve = NULL);
 	}
-	// printf("char_read = %d, last_line_checked = %d", char_read, last_line_checked);
 	if (!char_read && !last_line_checked)
 	{
-		//printf("emptying reserve");
 		last_line_checked = 1;
 		line = reserve;
 		reserve = NULL;
@@ -133,12 +132,12 @@ char	*get_next_line(int fd)
 	return (line);
 }
 
-int	main()
+/* int	main()
 {
 	int	fd;
 	int	i;
 
-	fd = open("files/nl", O_RDONLY);
+	fd = open("texts/text.txt", O_RDONLY);
 	i = 1;
 	if (fd == -1)
 		return (1);
@@ -150,4 +149,4 @@ int	main()
 	if (close(fd) == -1)
 		return (1);
 	return (0);
-}
+} */

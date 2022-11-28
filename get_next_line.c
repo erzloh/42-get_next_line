@@ -6,15 +6,26 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/28 08:45:01 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/28 10:45:27 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-// Remove a line from the reserve
+// Return 1 if it found an error, return 0 if not.
+int	check_errors(int fd, char **reserve_ptr)
+{
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
+	{
+		free(*reserve_ptr);
+		*reserve_ptr = NULL;
+		return (1);
+	}
+	return (0);
+}
 
-void	update_reserve(char *reserve, char **ptr_reserve, int line_len)
+// Remove a line from the reserve.
+void	update_reserve(char *reserve, char **reserve_ptr, int line_len)
 {
 	int		i;
 	char	*new_reserve;
@@ -26,14 +37,13 @@ void	update_reserve(char *reserve, char **ptr_reserve, int line_len)
 	ft_memcpy(new_reserve, reserve + line_len, i);
 	new_reserve[i] = '\0';
 	free(reserve);
-	*ptr_reserve = new_reserve;
+	*reserve_ptr = new_reserve;
 }
 
 // Take the reserve and its address as arguments and return a line if a '\n' was
 // found and remove the line from the reserve to keep only what is following the
 // '\n'. Return NULL if no '\n' was found.
-
-char	*get_trimmed_line(char *reserve, char **ptr_reserve)
+char	*get_trimmed_line(char *reserve, char **reserve_ptr)
 {
 	int		i;
 	char	*line;
@@ -48,7 +58,7 @@ char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 				return (NULL);
 			ft_memcpy(line, reserve, i + 1);
 			line[i + 1] = '\0';
-			update_reserve(reserve, ptr_reserve, i + 1);
+			update_reserve(reserve, reserve_ptr, i + 1);
 			return (line);
 		}
 		i++;
@@ -56,76 +66,60 @@ char	*get_trimmed_line(char *reserve, char **ptr_reserve)
 	return (NULL);
 }
 
-char	*get_next_line(int fd)
+// Read a file and return a line if a newline is found.
+char	*read_and_get_line(int fd, char **reserve_ptr)
 {
-	int			char_read;
-	char		buf[BUFFER_SIZE + 1];
-	static char	*reserve;
-	char		*line;
+	int		char_read;
+	char	buf[BUFFER_SIZE + 1];
+	char	*line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, buf, 0) < 0) // Check errors
-	{
-		free(reserve);
-		return (reserve = NULL);
-	}
-	if (!reserve) // Create an empty string if reserve is NULL
-	{
-		reserve = malloc(sizeof(char) * 1);
-		if (!reserve)
-			return (NULL);
-		*reserve = 0;
-	}
-	//printf("\n---reserve=%s---\n", reserve);
-	line = get_trimmed_line(reserve, &reserve); // Check if there's a newline in the reserve
+	line = get_trimmed_line(*reserve_ptr, reserve_ptr);
 	if (line)
 		return (line);
 	char_read = read(fd, buf, BUFFER_SIZE);
 	while (char_read)
 	{
 		buf[char_read] = '\0';
-		reserve = ft_strjoin(reserve, buf);
-		line = get_trimmed_line(reserve, &reserve);
+		*reserve_ptr = ft_strjoin(*reserve_ptr, buf);
+		line = get_trimmed_line(*reserve_ptr, reserve_ptr);
 		if (line)
 			return (line);
 		if (char_read == BUFFER_SIZE)
 			char_read = read(fd, buf, BUFFER_SIZE);
 		else
 		{
-			line = reserve;
-			reserve = NULL;
+			line = *reserve_ptr;
+			*reserve_ptr = NULL;
 			return (line);
-			break ;
 		}
 	}
-	if (!char_read && !*reserve) // Check there is nothing to read and the reserve is empty
+	return (NULL);
+}
+
+// The get_next_line function
+char	*get_next_line(int fd)
+{
+	static char	*reserve;
+	char		*line;
+
+	if (check_errors(fd, &reserve))
+		return (NULL);
+	if (!reserve)
+	{
+		reserve = malloc(sizeof(char) * 1);
+		if (!reserve)
+			return (NULL);
+		*reserve = 0;
+	}
+	line = read_and_get_line(fd, &reserve);
+	if (line)
+		return (line);
+	if (!*reserve)
 	{
 		free(reserve);
 		return (reserve = NULL);
 	}
-	if (!char_read)
-	{
-		line = reserve;
-		reserve = NULL;
-		return (line);
-	}
+	line = reserve;
+	reserve = NULL;
 	return (line);
 }
-
-/* int	main()
-{
-	int	fd;
-	int	i;
-
-	fd = open("texts/text.txt", O_RDONLY);
-	i = 1;
-	if (fd == -1)
-		return (1);
-	while (i <= 10)
-	{
-		printf("\nline %d: %s\n", i, get_next_line(fd));
-		i++;
-	}
-	if (close(fd) == -1)
-		return (1);
-	return (0);
-} */

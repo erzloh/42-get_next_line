@@ -6,7 +6,7 @@
 /*   By: eholzer <eholzer@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 08:43:58 by eholzer           #+#    #+#             */
-/*   Updated: 2022/11/25 10:06:44 by eholzer          ###   ########.fr       */
+/*   Updated: 2022/11/28 08:45:01 by eholzer          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ char	*get_next_line(int fd)
 	char		buf[BUFFER_SIZE + 1];
 	static char	*reserve;
 	char		*line;
-	static char	last_line_checked;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, buf, 0) < 0) // Check errors
 	{
@@ -81,34 +80,20 @@ char	*get_next_line(int fd)
 	if (line)
 		return (line);
 	char_read = read(fd, buf, BUFFER_SIZE);
-	if (!char_read && *reserve) // Check for newlines in the reserve
+	while (char_read)
 	{
+		buf[char_read] = '\0';
+		reserve = ft_strjoin(reserve, buf);
 		line = get_trimmed_line(reserve, &reserve);
 		if (line)
 			return (line);
-		// last_line_checked = 1;
-	}
-	while (char_read)
-	{
 		if (char_read == BUFFER_SIZE)
-		{
-			buf[char_read] = '\0';
-			reserve = ft_strjoin(reserve, buf);
-			line = get_trimmed_line(reserve, &reserve);
-			if (line)
-				return (line);
 			char_read = read(fd, buf, BUFFER_SIZE);
-		}
 		else
 		{
-			buf[char_read] = '\0';
-			reserve = ft_strjoin(reserve, buf);
-			line = get_trimmed_line(reserve, &reserve);
-			if (line)
-				return (line);
 			line = reserve;
 			reserve = NULL;
-			last_line_checked = 1;
+			return (line);
 			break ;
 		}
 	}
@@ -117,17 +102,11 @@ char	*get_next_line(int fd)
 		free(reserve);
 		return (reserve = NULL);
 	}
-	if (!char_read && !last_line_checked)
+	if (!char_read)
 	{
-		last_line_checked = 1;
 		line = reserve;
 		reserve = NULL;
 		return (line);
-	}
-	if (!line)
-	{
-		free(reserve);
-		reserve = NULL;
 	}
 	return (line);
 }
